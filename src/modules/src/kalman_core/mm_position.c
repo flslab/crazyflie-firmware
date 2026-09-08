@@ -25,11 +25,16 @@
 
 #include "mm_position.h"
 
+extern uint8_t extPosIgnoreZ;
+
 void kalmanCoreUpdateWithPosition(kalmanCoreData_t* this, positionMeasurement_t *xyz)
 {
   // a direct measurement of states x, y, and z
   // do a scalar update for each state, since this should be faster than updating all together
   for (int i=0; i<3; i++) {
+    if (i == 2 && xyz->source == MeasurementSourceLocationService && extPosIgnoreZ) {
+      continue;
+    }
     float h[KC_STATE_DIM] = {0};
     arm_matrix_instance_f32 H = {1, KC_STATE_DIM, h};
     h[KC_STATE_X+i] = 1;

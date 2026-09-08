@@ -37,6 +37,7 @@ static float measuredNX;
 static float measuredNY;
 
 static Axis3f flowdeckPos = { .axis = { FLOWDECK_POS_X, FLOWDECK_POS_Y, FLOWDECK_POS_Z } }; // In body coordinate system
+static uint8_t flowdeckIgnoreXY = 0;
 
 void kalmanCoreUpdateWithFlow(kalmanCoreData_t* this, const flowMeasurement_t *flow, const Axis3f *gyro)
 {
@@ -88,7 +89,9 @@ void kalmanCoreUpdateWithFlow(kalmanCoreData_t* this, const flowMeasurement_t *f
   hx[KC_STATE_PX] = (Npix * flow->dt / thetapix) * (this->R[2][2] / z_g);
 
   //First update
-  kalmanCoreScalarUpdate(this, &Hx, (measuredNX-predictedNX), flow->stdDevX*FLOW_RESOLUTION);
+  if (!flowdeckIgnoreXY) {
+    kalmanCoreScalarUpdate(this, &Hx, (measuredNX-predictedNX), flow->stdDevX*FLOW_RESOLUTION);
+  }
 
   // Y velocity prediction and update
   float hy[KC_STATE_DIM] = {0};
@@ -101,7 +104,9 @@ void kalmanCoreUpdateWithFlow(kalmanCoreData_t* this, const flowMeasurement_t *f
   hy[KC_STATE_PY] = (Npix * flow->dt / thetapix) * (this->R[2][2] / z_g);
 
   // Second update
-  kalmanCoreScalarUpdate(this, &Hy, (measuredNY-predictedNY), flow->stdDevY*FLOW_RESOLUTION);
+  if (!flowdeckIgnoreXY) {
+    kalmanCoreScalarUpdate(this, &Hy, (measuredNY-predictedNY), flow->stdDevY*FLOW_RESOLUTION);
+  }
 }
 
 /**
@@ -151,4 +156,8 @@ PARAM_GROUP_START(flowdeck)
    * @brief Flow deck position Z (in meters, body frame)
    */
   PARAM_ADD_CORE(PARAM_FLOAT | PARAM_PERSISTENT, flowdeckPos_z, &flowdeckPos.z)
+  /**
+   * @brief Ignore X and Y velocity updates from flow deck
+   */
+  PARAM_ADD_CORE(PARAM_UINT8, ignoreXY, &flowdeckIgnoreXY)
 PARAM_GROUP_STOP(flowdeck)

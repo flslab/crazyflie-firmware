@@ -147,6 +147,8 @@ static uint8_t lhMatchedStreamMaxTimeMs = 25;
 static uint8_t lhMatchedStreamMinBsCount = 2;
 static paramVarId_t enLhMtchStmParamId;
 
+uint8_t extPosIgnoreZ = 0;
+
 static float extPosStdDev = 0.01;
 static float extQuatStdDev = 4.5e-3;
 static bool isInit = false;
@@ -600,4 +602,8 @@ PARAM_GROUP_START(locSrv)
  * @brief Standard deviation of the quarternion data to kalman filter
  */
   PARAM_ADD_CORE(PARAM_FLOAT, extQuatStdDev, &extQuatStdDev)
+  /**
+ * @brief Ignore Z coordinate of external position
+ */
+  PARAM_ADD_CORE(PARAM_UINT8, extPosIgnoreZ, &extPosIgnoreZ)
 PARAM_GROUP_STOP(locSrv)
